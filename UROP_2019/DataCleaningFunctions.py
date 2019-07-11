@@ -6,12 +6,21 @@ def remove_cols(df, remove):
     """
     'df' is the dataframe and 'remove' is a list of col heads to be removed
     """
+    if type(remove) == str:
+        temp = []
+        temp.append(remove)
+        remove = temp
+    
     df.drop(columns= remove, inplace= True)
 
-def remove_row(df, remove):
+def remove_rows(df, remove):
     """
     'df' is the dataframe and 'remove' is a list of rows to be removed
     """
+    if type(remove) == str:
+        temp = []
+        temp.append(remove)
+        remove = temp
     df.drop(index= remove, inplace= True)
 
 def only_keep_rows(df, keep):
@@ -93,8 +102,6 @@ def create_limiting_factor(df, colname, characters, len= 0, exact= False, positi
     final = ''
     if position == 'start':
         final = final + '^'
-    elif position == 'end':
-        final = final + '$'
 
     if characters == 'digits':
         final = final + '(\\d'
@@ -103,11 +110,15 @@ def create_limiting_factor(df, colname, characters, len= 0, exact= False, positi
     elif characters == 'alphanumeric':
         final = final + '(\\w'
     
-    if len != 0:
-        final = final + '{' + str(len)
-        if exact == False:
-            final = final + '+'
-        final = final + '}'
+    if len != 0 and exact:
+        final = final + '{' + str(len) + '}'
+    if len != 0 and exact == False:
+        final = final + str(len) + "+"
+    if len == 0 and exact == False:
+        final = final + '+'
+
+    if position == 'end':
+        final = final + '$'
         
     final = final + ')'
     
@@ -126,6 +137,45 @@ def boolean_db_contains(df, colname, string, newcolname= None):
     if newcolname == None:
         newcolname = 'Contains ' + string
     df.insert(df.columns.get_loc(colname) + 1, newcolname, list(ex), True)
+
+def remove_row_containing(df, colname, string):
+    """
+    Finds every row in column 'colname' that contains the str 'string'
+    and removes it.
+    'df' is the dataframe, 'colname' is the column name and 'string'
+    is the str
+    """
+    ex = df[colname]
+    ex_list = list(ex)
+    temp = []
+    for i in range(len(ex_list)):
+        if string in ex_list[i]:
+            temp.append(df.iloc[i].name)
+
+    remove_rows(df, temp)
+
+    # df[~df[colname].isin([string])]
+
+def split_at_char(df, colname, string, newcolname):
+    """
+    Splits the column 'colname' into two at 'string'. ('string'
+    not included)
+    'df' is the Dataframe, 'colname' is the column to search for
+    the str 'string', 'string' is where the column gets split, and
+    'newcolname' is the name the new column will have
+    """
+    ex = df[colname]
+    ex_list = list(ex)
+    new_list = [None for i in range(len(ex_list))]
+    
+    for i in range(len(ex_list)):
+        if string in ex_list[i]:
+            word = ex_list[i]
+            index = word.find(string)
+            df.at[df.iloc[i].name, colname] = word[:index]
+            new_list[i] = word[index + len(string):]
+
+    df.insert(df.columns.get_loc(colname) + 1, newcolname, new_list, True)
 
 def find_and_replace_cell_within_col(df, colname, str1,str2):
     """
@@ -176,8 +226,37 @@ def rename_cols(df, new_names):
     df.rename(columns= mapping, inplace= True)
 
 def reset_index(df):
+
+
     """
     Resets index
     'df' is the dataframe
     """
     df.reset_index(drop= True)
+
+def combine_cols(df, col1, col2):
+
+    """
+    Combines two columns, 'col2' gets merged with 'col1' while
+    'col2' gets deleted
+    'df' is a Dataframe, 'col1' is the name of the column that
+    changes, and 'col2' is the name of the column that merges
+    """
+    ex1 = df[col1]
+    ex2 = df[col2]
+    ex1_list = list(ex1)
+    ex2_list = list(ex2)
+
+    final = []
+    if type(ex1_list[0]) == type(ex2_list[0]):
+        for i in range(len(ex1_list)):
+            temp = ex1_list[i] + ex2_list[i]
+            final.append(temp)
+    else:
+        for i in range(len(ex1_list)):
+            temp = str(ex1_list[i]) + ' ' + str(ex2_list[i])
+            final.append(temp)
+    
+    df[col1] = final
+
+    remove_cols(df, col2)
