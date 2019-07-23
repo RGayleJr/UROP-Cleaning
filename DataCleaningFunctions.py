@@ -601,4 +601,11 @@ We should make the identifier column a changable column as well.
 Like, by default its "Digits" and ascending, but we can change it 
 to descending. If they change it to "Words" then it goes in
 ascending order "abcdefg..."
+I think it should like as much like Excel as possible. We want it
+to be intuitive to use and people are already comfortable with
+Excel. The suggestions format used in Trifacta seems the easiest
+to use.
+Pattern creator -- tool that alows the user to select as many
+different selection of texts, and the computer will return
+a reg ex that matches all of the selected texts.
 """
