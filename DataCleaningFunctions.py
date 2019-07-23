@@ -50,20 +50,8 @@ def remove_rows(df, remove):
         temp = []
         temp.append(remove)
         remove = temp
-    
-    columns = list(df)
-    final = []
-    for each in remove:
-        if each not in columns:
-            for i in columns:
-                col = i[0]
-                if col == each:
-                    final.append(i)
-                    break
-        else:
-            final.append(each)
 
-    df.drop(index= final, inplace= True)
+    df.drop(index= remove, inplace= True)
 
     infer_datatype_values(df)
         
@@ -368,17 +356,17 @@ def rename_cols(df, new_names):
     if type(new_names) == dict:
         columns = list(df)
         temp = {}
-        if new_names not in columns:
-            for name in new_names:
+        for name in new_names:
+            if name not in columns:
                 for i in columns:
                     col = i[0]
                     if col == name:
                         temp[i] = new_names[name]
                         break
-                break
-            new_names = temp
+            else:
+                temp[name] = new_names[name]
+        new_names = temp
         mapping = new_names
-
     df.rename(columns= mapping, inplace= True)
 
 def reset_index(df):
@@ -441,14 +429,28 @@ def enumerate_regex(selection):
         if type(select[0]) == str:
             temp = select[0]
             if temp.isalpha():
-                pass
+                options = [temp, '[a-zA-Z]', ]
+
+        for expr in final:
+            for option in options:
+                add(option, expr)
+
+        find_possibiliities(select[1:])
 
     def add(option, exp):
         expression = exp[0]
         prev = exp[1]
-        if option == prev and '+' !=  expression[-1]:
-            pass
-
+        if option == prev and '+' !=  expression[-1] and '*' != expression[-1]:
+            expr1 = expression.copy()
+            expr2 = expression.copy()
+            expr1.append('+')
+            expr2.append('*')
+            final.append((expr1, prev))
+            final.append((expr2, prev))
+        expr3 = expression.copy()
+        expr3.append(option)
+        final.append((expr3, option))
+        
 def infer_datatype_value(df, col):
     if "#LOCKED#" in col[1]:
         return
@@ -508,7 +510,7 @@ def infer_datatype_value(df, col):
     else:
         rename_cols(df, {col: (col[0], final)})
     # mapping[col].type = final
-            
+
 def infer_datatype_values(df):
     columns = list(df)
 
@@ -543,7 +545,8 @@ def sort_by_col(df, cols, ascend= True, Nan= 'last'):
                     break
         else:
             final.append(col)
-    df.sort_values(by= final, ascending= ascend, na_position= Nan)
+
+    df.sort_values(by= final, ascending= ascend, na_position= Nan, inplace= True)
 
 def apply_func_to_col(df, func, col):
     columns = list(df)
