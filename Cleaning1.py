@@ -17,6 +17,8 @@ to_keep = [
     'Shelfmarks'
 ]
 
+print(df.head())
+
 dcf.initiate(df)
 dcf.remove_cols(df, to_drop)
 dcf.only_keep_cols(df, to_keep)
@@ -48,4 +50,6 @@ dcf.create_limiting_factor(df, 'ID #', 'digits')
 dcf.create_limiting_factor(df, '#2', 'digits')
 dcf.combine_cols(df, 'ID #', '#2')
 dcf.apply_func_to_col(df, lambda x: x - 1, 'ID #')
-dcf.sort_by_col(df, 'Place of Publication')
+dcf.sort_by_col(df, 'Place of Publication', ascend= False)
+
+print(df.head())

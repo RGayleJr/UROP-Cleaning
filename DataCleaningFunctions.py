@@ -19,6 +19,15 @@ def initiate(df):
         
     infer_datatype_values(df)  
 
+def change_value(df, col, row, new_value):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
+    df.at[row, col] = new_value
+
 def remove_cols(df, remove):
     """
     'df' is the dataframe and 'remove' is a list of col heads to be removed
@@ -76,7 +85,14 @@ def remove_duplicate_rows(df):
     """
     'df' is the dataframe
     """
+    size = len(df)
     df.drop_duplicates()
+    new_size = len(df)
+    diff = size - new_size
+    if size == new_size:
+        print('No Duplicates')
+    else:
+        print('Removed ' + diff + ' duplicates')
     infer_datatype_values(df)
 
 def only_keep_cols(df, keep):
@@ -125,7 +141,8 @@ def make_col_index(df, colname):
     """
     #A Pandas Index doesn’t make any guarantee of being unique
     if not is_every_value_unique(df, colname):
-        print("Not every index is unique")
+        print("Not every index is unique. Not done")
+        return
     columns = list(df)
     if colname in columns:
         df.set_index(colname, inplace= True)
@@ -177,6 +194,8 @@ def create_limiting_factor(df, colname, characters, len= 0, exact= False, positi
         final = final + '(\\D'
     elif characters == 'alphanumeric':
         final = final + '(\\w'
+    elif characters == 'letters':
+        final = final + '([A-Za-z]'
     
     if len != 0 and exact:
         final = final + '{' + str(len) + '}'
@@ -192,15 +211,21 @@ def create_limiting_factor(df, colname, characters, len= 0, exact= False, positi
     
     columns = list(df)
     if colname in columns:
-        extr = df[colname].str.extract(final, expand= False)
-        df[colname] = pd.to_numeric(extr)
+        extr = df[colname].str.extract(final, expand= False) 
+        if characters == 'digits':
+            df[colname] = pd.to_numeric(extr)
+        else:
+            df[colname] = extr
         infer_datatype_value(df, colname)
     else:
         for i in columns:
             col = i[0]
             if col == colname:
                 extr = df[i].str.extract(final, expand= False)
-                df[i] = pd.to_numeric(extr)
+                if characters == 'digits':    
+                    df[i] = pd.to_numeric(extr)
+                else:
+                    df[i] = extr
                 infer_datatype_value(df, i)
                 break
 
@@ -252,14 +277,36 @@ def remove_row_containing(df, colname, string):
     ex_list = list(ex)
     temp = []
     for i in range(len(ex_list)):
-        if string in ex_list[i]:
-            temp.append(df.iloc[i].name)
+        if type(string) == str:
+            if string in ex_list[i]:
+                temp.append(df.iloc[i].name)
+        else:
+            if string == ex_list[i]:
+                temp.append(df.iloc[i].name)
 
     remove_rows(df, temp)
 
     infer_datatype_values(df)
 
     # df[~df[colname].isin([string])]
+
+def remove_rows_with_nonenan_wihtin_col(df, col):
+    data_len = len(df)
+    remove = []
+    
+    def is_nan(x):
+        return (x is np.nan or x != x)
+    
+    for i in range(data_len):
+        if df.iloc[i][col] == None or is_nan(df.iloc[i][col]):
+            remove.append(i)
+
+    remove_rows(df, remove)
+
+def remove_rows_with_nonenan(df):
+    columns = list(df)
+    for i in columns:
+        remove_rows_with_nonenan_wihtin_col(df, i)
 
 def split_at_char(df, colname, string, newcolname):
     """
@@ -376,7 +423,7 @@ def reset_index(df):
     Resets index
     'df' is the dataframe
     """
-    df.reset_index(drop= True)
+    df.reset_index(drop= True, inplace= True)
 
 def combine_cols(df, col1, col2):
 
@@ -404,10 +451,15 @@ def combine_cols(df, col1, col2):
     ex2_list = list(ex2)
 
     final = []
+    tester = type(ex1_list[0])
     if type(ex1_list[0]) == type(ex2_list[0]):
         for i in range(len(ex1_list)):
-            temp = ex1_list[i] + ex2_list[i]
-            final.append(temp)
+            if tester != str:
+                temp = ex1_list[i] + ex2_list[i]
+                final.append(temp)
+            else:
+                temp = ex1_list[i] + ' ' + ex2_list[i]
+                final.append(temp)
     else:
         for i in range(len(ex1_list)):
             temp = str(ex1_list[i]) + ' ' + str(ex2_list[i])
@@ -417,9 +469,9 @@ def combine_cols(df, col1, col2):
 
     remove_cols(df, col2)
 
-    infer_datatype_values(df)
+    infer_datatype_value(df, col1)
 
-def enumerate_regex(selection):
+# def enumerate_regex(selection):
     final = []
 
     def find_possibiliities(select):
@@ -463,7 +515,9 @@ def infer_datatype_value(df, col):
             if colname == col:
                 col = i
 
-    sample_len = round(.1 * len(df))
+    sample_len = len(df)
+    if len(df) > 10000:
+        sample_len = round(.1 * len(df))
     hist = {}
     
     def is_nan(x):
@@ -520,8 +574,7 @@ def infer_datatype_values(df):
 def change_col_type(df, col, new_type):
 
     # mapping[col].type = new_type
-
-    rename_cols(df, {col: (col[0], new_type + " #LOCKED#")})
+    rename_cols(df, {col: (col, new_type + " #LOCKED#")})
 
 def sort_by_col(df, cols, ascend= True, Nan= 'last'):
     """
@@ -585,16 +638,49 @@ def square_num(df, col):
     apply_func_to_col(df, lambda x: x**x, col)
 
 def remove_numbers(df, col):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
     df[col] = df[col].str.replace('\d+', '')
 
 def remove_letters(df, col):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
     df[col] = df[col].str.replace('[a-zA-Z]+', '')
 
 def remove_whitespace(df, col):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
     df[col] = df[col].str.replace('\s+', '')
 
 def keep_letters(df, col):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
     df[col] = df[col].str.replace('[^a-zA-Z]+', '')
+
+def remove_whatever(df, col, pattern):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
+    df[col] = df[col].str.replace(pattern, '')
 
 """
 We should make the identifier column a changable column as well.
@@ -608,4 +694,13 @@ to use.
 Pattern creator -- tool that alows the user to select as many
 different selection of texts, and the computer will return
 a reg ex that matches all of the selected texts.
+Within column structures (if misc or alphanumerical, try
+going more in depth (Title, (Numbers, Words, Date)) )
+"""
+
+"""
+Is there code online for regex
+Read paragraph again (Potter's Wheel)
+Clean other datasets
+Design UI Mock-up
 """
