@@ -10,6 +10,8 @@ import math
 
 # column_objects = []
 # mapping = {}
+def is_nan(x):
+        return (x is np.nan or x != x)
 
 def initiate(df):
     # columns = list(df)
@@ -28,6 +30,15 @@ def change_value(df, col, row, new_value):
                 col = i
     df.at[row, col] = new_value
 
+def remove_value(df, col, row):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
+    change_value(df, col, row, np.nan)
+    
 def remove_cols(df, remove):
     """
     'df' is the dataframe and 'remove' is a list of col heads to be removed
@@ -66,10 +77,15 @@ def remove_rows(df, remove):
         
 def only_keep_rows(df, keep):
     """
-    'df' is the dataframe and 'keep' is a list of rows to keep
+    'df' is the dataframe and 'keep' is a list of rows to keep or
+    it is a tuple which represents a range (start, end)
     """
     remove = []
-    keep_set = set(keep)
+    if type(keep) == list:
+        keep_set = set(keep)
+    if type(keep) == tuple:
+        keep = [i for i in range(keep[0], keep[1])]
+        keep_set = set(keep)
 
     #find every col that is not being kept and add to the list 'remove'
     for row,_ in df.iterrows():
@@ -177,6 +193,16 @@ def get_col(df, col):
             if col == colname:
                 return df[i]
 
+def get_value(df, col, row):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
+
+    return df.at[row, col]
+
 def create_limiting_factor(df, colname, characters, len= 0, exact= False, position= None):
     """
     'df' is the dataframe; 'characters' is "alphanumeric", "digits",
@@ -189,7 +215,7 @@ def create_limiting_factor(df, colname, characters, len= 0, exact= False, positi
         final = final + '^'
 
     if characters == 'digits':
-        final = final + '(\\d'
+        final = final + '([\\d\.]'
     elif characters == 'non-digits':
         final = final + '(\\D'
     elif characters == 'alphanumeric':
@@ -290,16 +316,65 @@ def remove_row_containing(df, colname, string):
 
     # df[~df[colname].isin([string])]
 
+def keep_row_containing(df, colname, string):
+    columns = list(df)
+    if colname not in columns:
+        for i in columns:
+            col = i[0]
+            if col == colname:
+                colname = i
+
+    ex = df[colname]
+    ex_list = list(ex)
+    temp = []
+    for i in range(len(ex_list)):
+        if type(string) == str:
+            if string not in ex_list[i]:
+                temp.append(df.iloc[i].name)
+        else:
+            if string != ex_list[i]:
+                temp.append(df.iloc[i].name)
+
+        remove_rows(df, temp)
+
+        infer_datatype_values(df)    
+
+def change_nonenan_within_col(df, col, new_value):
+    rows = list(df.index)
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
+
+    for row in rows:
+        if get_value(df, col, row) == None or is_nan(get_value(df, col, row)):
+            change_value(df, col, row, new_value)
+
+def change_nonenan(df, new_value):
+    columns = list(df)
+    for i in columns:
+        change_nonenan_within_col(df, i, new_value)
+
+def keep_rows_with_nonenan_within_col(df, col):
+    rows = list(df.index)
+    remove = set(rows)
+    
+    for row in rows:
+        if get_value(df, col, row) == None or is_nan(get_value(df, col, row)):
+            remove.remove(row)
+
+    remove = list(remove)
+    remove_rows(df, remove)
+
 def remove_rows_with_nonenan_wihtin_col(df, col):
-    data_len = len(df)
+    rows = list(df.index)
     remove = []
     
-    def is_nan(x):
-        return (x is np.nan or x != x)
-    
-    for i in range(data_len):
-        if df.iloc[i][col] == None or is_nan(df.iloc[i][col]):
-            remove.append(i)
+    for row in rows:
+        if get_value(df, col, row) == None or is_nan(get_value(df, col, row)):
+            remove.append(row)
 
     remove_rows(df, remove)
 
@@ -356,7 +431,7 @@ def find_and_replace_cell_within_col(df, colname, str1,str2):
             if col == colname:
                 temp = df[i]
                 conditional = temp.str.contains(str1)
-                df[i] = np.where(conditional, str2, temp.str.replace('', ''))
+                df[i] = np.where(conditional, str2, temp.str.replace('a', 'a'))
                 infer_datatype_value(df, i)
                 break
 
@@ -379,6 +454,16 @@ def find_and_replace(df, str1, str2):
     df.replace(str1, str2, inplace= True)
 
     infer_datatype_values(df)
+
+def find_and_replace_within_col(df, col, str1, str2):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
+
+    df[col] = df[col].str.replace(str1, str2)
 
 def change_header_row(filename, rownum):
     """
@@ -531,7 +616,8 @@ def infer_datatype_value(df, col):
         elif key == str:
             if re.search('^[(]?\d{3}[\-)]? ?\d{3}[- ]?\d{4}$', data) != None:
                 key = 'Phone Number'
-            elif re.search('^\d\d?[-/]\d\d?[-/]\d\d\d?\d?$', data) != None:
+            elif re.search('^\d{1,4}([-\/]\d{1,4}){1,2}$', data) != None:
+                #^\d\d?[-/]\d\d?[-/]\d\d\d?\d?$
                 key = 'Date'
             elif re.search('^\d*:\d+[\d:]*', data) != None:
                 key = 'Time'
@@ -696,11 +782,15 @@ different selection of texts, and the computer will return
 a reg ex that matches all of the selected texts.
 Within column structures (if misc or alphanumerical, try
 going more in depth (Title, (Numbers, Words, Date)) )
+Options or things to do with things that do not match that type
+    -remove them
+    -set their values to something
 """
 
 """
 Is there code online for regex
 Read paragraph again (Potter's Wheel)
 Clean other datasets
+Do a cleaning (describe function from pandas)
 Design UI Mock-up
 """
