@@ -285,6 +285,13 @@ def boolean_db_contains(df, colname, string, newcolname= None):
     
     infer_datatype_value(df, newcolname)
 
+def create_new_col(df, newcolname, position= None, value= np.nan):
+    if position == None:
+        position = len(list(df))
+    df.insert(position, newcolname, [value for i in range(len(df))])
+
+    infer_datatype_value(df, newcolname)
+
 def remove_row_containing(df, colname, string):
     """
     Finds every row in column 'colname' that contains the str 'string'
@@ -465,7 +472,7 @@ def find_and_replace_within_col(df, col, str1, str2):
 
     df[col] = df[col].str.replace(str1, str2)
 
-def change_header_row(filename, rownum):
+def change_header_row(df, filename, rownum):
     """
     Sets the header row to the 'rownum' row index
     """
@@ -662,6 +669,11 @@ def change_col_type(df, col, new_type):
     # mapping[col].type = new_type
     rename_cols(df, {col: (col, new_type + " #LOCKED#")})
 
+def unlock_col_type(df, col):
+    ogtype = col[1]
+    ogtype = col[1].replace(' #LOCKED#', '')
+    rename_cols(df, {col: (col, ogtype)})
+
 def sort_by_col(df, cols, ascend= True, Nan= 'last'):
     """
     'df' is the Dataframe. 'cols' is/are the column/s being sorted
@@ -759,6 +771,15 @@ def keep_letters(df, col):
                 col = i
     df[col] = df[col].str.replace('[^a-zA-Z]+', '')
 
+def keep_numbers(df, col):
+    columns = list(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                col = i
+    df[col] = df[col].str.replace('[^\d]+', '')
+
 def remove_whatever(df, col, pattern):
     columns = list(df)
     if col not in columns:
@@ -785,6 +806,7 @@ going more in depth (Title, (Numbers, Words, Date)) )
 Options or things to do with things that do not match that type
     -remove them
     -set their values to something
+Nest cols/rows
 """
 
 """
