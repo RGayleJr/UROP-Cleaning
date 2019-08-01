@@ -4,14 +4,25 @@ import pdb
 import re
 import math
 
-# class Column:
-#     def init(self):
-#         self.type = None
-
-# column_objects = []
-# mapping = {}
 def is_nan(x):
         return (x is np.nan or x != x)
+
+def get_col_name(df, col):
+    columns = set(df)
+    if col not in columns:
+        for i in columns:
+            colname = i[0]
+            if colname == col:
+                return i
+    else:
+        return col
+
+def get_col_list(df, cols):
+    final = []
+    for col in cols:
+        temp = get_col_name(df, col)
+        final.append(temp)
+    return final
 
 def initiate(df):
     # columns = list(df)
@@ -22,43 +33,23 @@ def initiate(df):
     infer_datatype_values(df)  
 
 def change_value(df, col, row, new_value):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
     df.at[row, col] = new_value
 
 def remove_value(df, col, row):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
     change_value(df, col, row, np.nan)
     
 def remove_cols(df, remove):
     """
     'df' is the dataframe and 'remove' is a list of col heads to be removed
     """
-    if type(remove) == str:
+    if type(remove) == str or type(remove) == tuple:
         temp = []
         temp.append(remove)
         remove = temp
 
-    columns = list(df)
-    final = []
-    for each in remove:
-        if each not in columns:
-            for i in columns:
-                col = i[0]
-                if col == each:
-                    final.append(i)
-                    break
-        else:
-            final.append(each)
+    final = get_col_list(df, remove)
 
     df.drop(columns= final, inplace= True)
 
@@ -115,20 +106,10 @@ def only_keep_cols(df, keep):
     """
     'df' is the dataframe and 'keep' is a list of col heads to keep
     """
-    columns = list(df)
     remove = []
 
-    temp = set()
-    for item in keep:
-        if item not in columns:
-            for i in columns:
-                col = i[0]
-                if col == item:
-                    temp.add(i)
-                    break
-        else:
-            temp.add(item)
-    keep_set = temp
+    keep = get_col_list(df, keep)
+    keep_set = set(keep)
 
     #find every col that is not being kept and add to the list 'remove'
     for col in df.columns:
@@ -142,14 +123,8 @@ def is_every_value_unique(df, colname):
     """
     'df' is the dataframe and colname is a col name
     """
-    try:
-        return df[colname].is_unique
-    except:
-        columns = list(df)    
-        for j in columns:
-            col = j[0]
-            if col == colname:
-                return df[j].is_unique
+    colname = get_col_name(df, colname)
+    return df[colname].is_unique
 
 def make_col_index(df, colname):
     """
@@ -159,14 +134,8 @@ def make_col_index(df, colname):
     if not is_every_value_unique(df, colname):
         print("Not every index is unique. Not done")
         return
-    columns = list(df)
-    if colname in columns:
-        df.set_index(colname, inplace= True)
-    else:
-        for i in columns:
-            col = i[0]
-            if col == colname:
-                df.set_index(i, inplace= True)
+    colname = get_col_name(df, colname)
+    df.set_index(colname, inplace= True)
 
 def get_row(df, dna):
     """
@@ -184,23 +153,11 @@ def get_col(df, col):
     """
     'df' is the dataframe and 'col' is the column name
     """
-    columns = list(df)
-    if col in columns:
-        return df[col]
-    else:
-        for i in columns:
-            colname = i[0]
-            if col == colname:
-                return df[i]
+    col = get_col_name(df, col)
+    return df[col]
 
 def get_value(df, col, row):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
-
+    col = get_col_name(df, col)
     return df.at[row, col]
 
 def create_limiting_factor(df, colname, characters, len= 0, exact= False, position= None):
@@ -215,7 +172,7 @@ def create_limiting_factor(df, colname, characters, len= 0, exact= False, positi
         final = final + '^'
 
     if characters == 'digits':
-        final = final + '([\\d\.]'
+        final = final + '([\\d\\.]*[\\d]'
     elif characters == 'non-digits':
         final = final + '(\\D'
     elif characters == 'alphanumeric':
@@ -235,25 +192,14 @@ def create_limiting_factor(df, colname, characters, len= 0, exact= False, positi
         
     final = final + ')'
     
-    columns = list(df)
-    if colname in columns:
-        extr = df[colname].str.extract(final, expand= False) 
-        if characters == 'digits':
-            df[colname] = pd.to_numeric(extr)
-        else:
-            df[colname] = extr
-        infer_datatype_value(df, colname)
+    colname = get_col_name(df, colname)
+    
+    extr = df[colname].str.extract(final, expand= False) 
+    if characters == 'digits':
+        df[colname] = pd.to_numeric(extr)
     else:
-        for i in columns:
-            col = i[0]
-            if col == colname:
-                extr = df[i].str.extract(final, expand= False)
-                if characters == 'digits':    
-                    df[i] = pd.to_numeric(extr)
-                else:
-                    df[i] = extr
-                infer_datatype_value(df, i)
-                break
+        df[colname] = extr
+    infer_datatype_value(df, colname)
 
 def boolean_db_contains(df, colname, string, newcolname= None):
     """
@@ -263,26 +209,14 @@ def boolean_db_contains(df, colname, string, newcolname= None):
     the substring to search for; 'newcolname' is the name of the column that
     the boolean values should have
     """
-    columns = list(df)
-    full = False
-    if colname in columns:
-        ex = df[colname].str.contains(string)
-        full = True
-    else:
-        columns = list(df)
-        for i in columns:
-            col = i[0]
-            if col == colname:
-                ex = df[i].str.contains(string)
-                break
+    colname = get_col_name(df, colname)
+    
+    ex = df[colname].str.contains(string)
 
     if newcolname == None:
         newcolname = 'Contains ' + string
-    if full:
-        df.insert(df.columns.get_loc(colname) + 1, newcolname, [str(i) for i in list(ex)], True)
-    else:
-        df.insert(df.columns.get_loc(i) + 1, newcolname, [str(i) for i in list(ex)], True)
-    
+    df.insert(df.columns.get_loc(colname) + 1, newcolname, [str(i) for i in list(ex)], True)
+
     infer_datatype_value(df, newcolname)
 
 def create_new_col(df, newcolname, position= None, value= np.nan):
@@ -299,12 +233,7 @@ def remove_row_containing(df, colname, string):
     'df' is the dataframe, 'colname' is the column name and 'string'
     is the str
     """
-    columns = list(df)
-    if colname not in columns:
-        for i in columns:
-            col = i[0]
-            if col == colname:
-                colname = i
+    colname = get_col_name(df, colname)
 
     ex = df[colname]
     ex_list = list(ex)
@@ -324,12 +253,7 @@ def remove_row_containing(df, colname, string):
     # df[~df[colname].isin([string])]
 
 def keep_row_containing(df, colname, string):
-    columns = list(df)
-    if colname not in columns:
-        for i in columns:
-            col = i[0]
-            if col == colname:
-                colname = i
+    colname = get_col_name(df, colname)
 
     ex = df[colname]
     ex_list = list(ex)
@@ -348,12 +272,7 @@ def keep_row_containing(df, colname, string):
 
 def change_nonenan_within_col(df, col, new_value):
     rows = list(df.index)
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
 
     for row in rows:
         if get_value(df, col, row) == None or is_nan(get_value(df, col, row)):
@@ -398,12 +317,7 @@ def split_at_char(df, colname, string, newcolname):
     the str 'string', 'string' is where the column gets split, and
     'newcolname' is the name the new column will have
     """
-    columns = list(df)
-    if colname not in columns:
-        for i in columns:
-            col = i[0]
-            if col == colname:
-                colname = i
+    colname = get_col_name(df, colname)
 
     ex = df[colname]
     ex_list = list(ex)
@@ -426,21 +340,11 @@ def find_and_replace_cell_within_col(df, colname, str1,str2):
     Searches for 'str1' within a column and replaces
     the cell's text with 'str2'
     """
-    columns = list(df)
-    if colname in columns:
-        temp = df[colname]
-        conditional = temp.str.contains(str1)
-        df[colname] = np.where(conditional, str2, temp.str.replace('', ''))
-        infer_datatype_value(df, colname)
-    else:
-        for i in columns:
-            col = i[0]
-            if col == colname:
-                temp = df[i]
-                conditional = temp.str.contains(str1)
-                df[i] = np.where(conditional, str2, temp.str.replace('a', 'a'))
-                infer_datatype_value(df, i)
-                break
+    colname = get_col_name(df, colname)
+    temp = df[colname]
+    conditional = temp.str.contains(str1)
+    df[colname] = np.where(conditional, str2, temp.str.replace('', ''))
+    infer_datatype_value(df, colname)
 
 def find_and_replace_cell_everywhere(df, str1, str2):
     """
@@ -463,12 +367,7 @@ def find_and_replace(df, str1, str2):
     infer_datatype_values(df)
 
 def find_and_replace_within_col(df, col, str1, str2):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
 
     df[col] = df[col].str.replace(str1, str2)
 
@@ -509,8 +408,6 @@ def rename_cols(df, new_names):
     df.rename(columns= mapping, inplace= True)
 
 def reset_index(df):
-
-
     """
     Resets index
     'df' is the dataframe
@@ -525,17 +422,8 @@ def combine_cols(df, col1, col2):
     'df' is a Dataframe, 'col1' is the name of the column that
     changes, and 'col2' is the name of the column that merges
     """
-    columns = list(df)
-    if col1 not in columns:
-        for i in columns:
-            col = i[0]
-            if col == col1:
-                col1 = i
-    if col2 not in columns:
-        for i in columns:
-            col = i[0]
-            if col == col2:
-                col2 = i
+    col1 = get_col_name(df, col1)
+    col2 = get_col_name(df, col2)
 
     ex1 = df[col1]
     ex2 = df[col2]
@@ -599,13 +487,7 @@ def infer_datatype_value(df, col):
     if "#LOCKED#" in col[1]:
         return
 
-    columns = list(df)
-    
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
 
     sample_len = len(df)
     if len(df) > 10000:
@@ -666,13 +548,15 @@ def infer_datatype_values(df):
 
 def change_col_type(df, col, new_type):
 
-    # mapping[col].type = new_type
-    rename_cols(df, {col: (col, new_type + " #LOCKED#")})
+    col = get_col_name(df, col)
+    if type(col) == tuple:
+        rename_cols(df, {col: (col[0], new_type + " #LOCKED#")})
+    else:
+        rename_cols(df, {col: (col, new_type + ' #LOCKED#')})
 
 def unlock_col_type(df, col):
-    ogtype = col[1]
     ogtype = col[1].replace(' #LOCKED#', '')
-    rename_cols(df, {col: (col, ogtype)})
+    rename_cols(df, {col: (col[0], ogtype)})
 
 def sort_by_col(df, cols, ascend= True, Nan= 'last'):
     """
@@ -685,27 +569,13 @@ def sort_by_col(df, cols, ascend= True, Nan= 'last'):
         temp.append(cols)
         cols = temp
 
-    columns = list(df)
-    final = []
-    for col in cols:
-        if col not in columns:
-            for i in columns:
-                colname = i[0]
-                if colname == col:
-                    final.append(i)
-                    break
-        else:
-            final.append(col)
+    final = get_col_list(df, cols)
 
     df.sort_values(by= final, ascending= ascend, na_position= Nan, inplace= True)
 
 def apply_func_to_col(df, func, col):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
+
     df[col] = df[col].apply(func)
 
 def make_lowercase(df, col):
@@ -736,57 +606,27 @@ def square_num(df, col):
     apply_func_to_col(df, lambda x: x**x, col)
 
 def remove_numbers(df, col):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
     df[col] = df[col].str.replace('\d+', '')
 
 def remove_letters(df, col):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
     df[col] = df[col].str.replace('[a-zA-Z]+', '')
 
 def remove_whitespace(df, col):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
     df[col] = df[col].str.replace('\s+', '')
 
 def keep_letters(df, col):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
     df[col] = df[col].str.replace('[^a-zA-Z]+', '')
 
 def keep_numbers(df, col):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
     df[col] = df[col].str.replace('[^\d]+', '')
 
 def remove_whatever(df, col, pattern):
-    columns = list(df)
-    if col not in columns:
-        for i in columns:
-            colname = i[0]
-            if colname == col:
-                col = i
+    col = get_col_name(df, col)
     df[col] = df[col].str.replace(pattern, '')
 
 """
