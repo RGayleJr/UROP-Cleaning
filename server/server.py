@@ -1,7 +1,7 @@
 
 import sys
 from flask import Flask
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from flask import request
 from flask import Response
 import json
@@ -37,12 +37,12 @@ def customddataset():
     # reset column headers to just name
     df.columns = [c[0] for c in df.columns]
 
-    return Response(df.to_json(), mimetype='application/json')
+    return Response(df.to_csv(), mimetype='application/json')
 
 @app.route("/original", methods=["GET"])
 def original():
     global df_orig
-    return Response(df_orig.to_json(), mimetype='application/json')
+    return Response(df_orig.to_csv(), mimetype='application/json')
 
 if __name__ == "__main__":
     app.run("0.0.0.0", 9050, threaded=True)
