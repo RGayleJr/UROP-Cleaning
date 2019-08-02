@@ -14,6 +14,6 @@ export class DataTableRow extends React.Component<IProps> {
 
     render(): React.ReactNode {
         let cells = this.props.columns.map((v: string, i: number) => <td className="datatable-cell" key={i}>{this.props.converters[i].Convert(v)}</td>);
-        return <tr onClick={()=>{console.log("row licked")}} className="datatable-row">{cells}</tr>;
+        return <tr onClick={()=>{console.log("row clicked")}} className="datatable-row">{cells}</tr>;
     }
 }

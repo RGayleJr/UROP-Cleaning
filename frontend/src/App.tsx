@@ -12,7 +12,7 @@ window.oncontextmenu = function (event) {
 	return false;
 };
 configure ({ enforceActions: "observed" });  // causes errors to be generated when modifying an observable outside of an action
-console.log("ssoifdjsf")
+
 ReactDOM.render(<MainView />, document.getElementById("root"));
 
 if (module.hot) {
