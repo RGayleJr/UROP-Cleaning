@@ -16,7 +16,9 @@ export class MainView extends React.Component {
 
     @action
     onCleanClick = (e: React.MouseEvent) => {
-        let commands = [ "dcf.create_limiting_factor(df, 'PID', 'digits')", "dcf.keep_rows_with_nonenan_within_col(df, 'MOVE_IN_DATE')"];
+        let commands = [ 
+            "dcf.create_limiting_factor(df, 'PID', 'digits')", 
+            "dcf.keep_rows_with_nonenan_within_col(df, 'MOVE_IN_DATE')"];
         Gateway.GetCleanCsv(commands).then(response => {
             response.text().then(csvText => {
                 runInAction(() => {
