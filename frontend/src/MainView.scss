@@ -8,10 +8,59 @@
         }
     }
 
+    $btn-font-size: 18px;
+    $btn-font-weight: 600;
+
     .btn-clean {
         display: block;
         margin: 0 auto;
-        font-size: 18px;
-        font-weight: 600;
+        font-size: $btn-font-size;
+        font-weight: $btn-font-weight;
+    }
+
+    .btn-remove {
+        display: table-cell;
+        margin: 0 auto;
+        font-size: $btn-font-size;
+        font-weight: $btn-font-weight;
+    }
+
+    .btn-keep {
+        display: table-cell;
+        margin: 0 auto;
+        font-size: $btn-font-size;
+        font-weight: $btn-font-weight;
+    }
+
+    .btn-NoneNan {
+        display: table-cell;
+        margin: 0 auto;
+        font-size: $btn-font-size;
+        font-weight: $btn-font-weight;
+    }
+    
+    .btn-createcol {
+        display: table-cell;
+        margin: 0 auto;
+        font-size: $btn-font-size;
+        font-weight: $btn-font-weight;
+    }
+
+    .search-bar {
+        // display: table-cell;
+        // margin: 0 auto;
+        // font-size: $btn-font-size;
+        // font-weight: $btn-font-weight;
+        overflow: hidden;
+        background-color: LightGray;
+        font-size: 15px;
+        margin: 5px;
+    }
+
+    .btn-search {
+        display: table-cell;
+        margin: 0 auto;
+        font-size: $btn-font-size;
+        font-weight: $btn-font-weight;
     }
 }

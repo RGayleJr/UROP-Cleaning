@@ -37,12 +37,12 @@ def customddataset():
     # reset column headers to just name
     df.columns = [c[0] for c in df.columns]
 
-    return Response(df.to_csv(), mimetype='application/json')
+    return Response(df.to_csv(), mimetype='text/csv')
 
 @app.route("/original", methods=["GET"])
 def original():
     global df_orig
-    return Response(df_orig.to_csv(), mimetype='application/json')
+    return Response(df_orig.to_csv(), mimetype='text/csv')
 
 if __name__ == "__main__":
     app.run("0.0.0.0", 9050, threaded=True)
