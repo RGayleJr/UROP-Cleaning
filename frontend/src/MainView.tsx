@@ -47,6 +47,9 @@ export class MainView extends React.Component {
         return (
             // <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></link>
             <div className="main-container" >
+                <div className="history">
+                    <h2>History</h2>
+                </div>
                 <div className="toolbar">
                     <button className='toolbar-element btn-remove'>Remove</button>
                     <button className='toolbar-element btn-keep'>Keep</button>
