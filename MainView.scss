@@ -1,0 +1,115 @@
+﻿.main-container {
+    margin: 0;
+    padding: 0;
+    $content-width: 800px;
+
+    .history {
+        position: absolute;
+        margin: 0;
+        width: 200px;
+        height: 100%;
+        background: #efefef;
+        z-index: 999;
+    }
+
+    .table-container {
+        width: $content-width;
+        margin: 0 auto;
+        overflow: scroll;
+        .datatable {
+            margin: 50px auto;
+
+            th,
+            td {
+                padding: 3px 10px;
+            }
+        }
+    }
+
+    $btn-font-size: 18px;
+    $btn-font-weight: 600;
+
+    .btn-clean {
+        display: block;
+        font-size: $btn-font-size;
+        font-weight: $btn-font-weight;
+    }
+
+    .toolbar {
+        display: flex;
+
+        flex-direction: row;
+        width: $content-width;
+        margin: 0 auto;
+
+        .first-sec {
+            display: flex;
+            width: 50%;
+
+            .toolbar-element {
+                display: block;
+                position: relative;
+                margin: 0 5px;
+                flex: 0 1 120px;
+                justify-items: center;
+                max-height: 40px;
+                font-size: $btn-font-size;
+                font-weight: $btn-font-weight;
+            }
+
+            .btn-remove {
+                display: block;
+                //  display: table-cell;
+                font-size: $btn-font-size;
+                font-weight: $btn-font-weight;
+            }
+
+            .search-bar {
+                background-color: LightGray;
+                font-size: 15px;
+                height: 100%;
+                margin: 0;
+                box-sizing: border-box;
+                padding: 0;
+            }
+
+            // .btn-search {
+            //     position: absolute;
+            //     display: block;
+            //     margin: 0 auto;
+            //     font-size: $btn-font-size;
+            //     font-weight: $btn-font-weight;
+            // }
+
+            .go-to {
+                background-color: LightGray;
+                font-size: 15px;
+                height: 100%;
+                width: 50%;
+                margin: 0;
+                box-sizing: border-box;
+                padding: 0;
+            }
+    
+        }
+
+        .second-sec {
+            display: block;
+            width: 20%;
+
+            .gen-data {
+                display: flex;
+            }
+        }
+        .third-sec {
+            display: flex row;
+            width: 30%;
+
+            .specific-cmds {
+                display: flex;
+            }
+        }
+        
+    }
+
+}
