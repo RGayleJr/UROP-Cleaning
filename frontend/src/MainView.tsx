@@ -9,12 +9,13 @@ import "./MainView.scss"
 export class MainView extends React.Component {
     @observable
     private _csvRows: string[];
-
     constructor(props: any) {
         super(props);
     }
 
     @action
+    var selection: any[];
+
     onCleanClick = (e: React.MouseEvent) => {
         let commands = [ 
             "dcf.create_limiting_factor(df, 'PID', 'digits')",
@@ -32,6 +33,11 @@ export class MainView extends React.Component {
         })
     };
 
+    onRemoveClick = (e: React.MouseEvent) => {
+        this.selection[0] = 'Remove';
+        console.log('Remove');
+    };
+
     componentDidMount() {
 
         Gateway.GetOriginalCsv().then(response => {
@@ -45,18 +51,30 @@ export class MainView extends React.Component {
 
     render() {
         return (
-            // <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></link>
             <div className="main-container" >
                 <div className="history">
                     <h2>History</h2>
                 </div>
                 <div className="toolbar">
-                    <button className='toolbar-element btn-remove'>Remove</button>
-                    <button className='toolbar-element btn-keep'>Keep</button>
-                    <button className='toolbar-element btn-NoneNan'>None/Nan</button>
-                    <button className='toolbar-element btn-createcol'>Create Col</button>
-                    <div className='toolbar-element'>
-                        <input type='text'placeholder= 'Search...' className='search-bar'></input>
+                    <div className='first-sec'>
+                        <button onClick={this.onRemoveClick} className='toolbar-element btn-remove'>Remove</button>
+                        <button className='toolbar-element btn-keep'>Keep</button>
+                        <button className='toolbar-element btn-NoneNan'>None/Nan</button>
+                        <button className='toolbar-element btn-createcol'>Create Col</button>
+                        <div className='toolbar-element'>
+                            <input type='text'placeholder= 'Search...' className='search-bar'></input>
+                            <input type='text' placeholder= 'Go to row...' className='go-to'></input>
+                            <input type='text' placeholder= 'Go to col...' className='go-to'></input>
+                        </div>
+                    </div>
+                    <div className='second-sec'>
+                        <div className='gen-data'>Gen data goes here</div>
+                        <div className='gen-data'>Pie graph, bar graph, etc...</div>
+                        <div className='gen-data'>Changes depending on what's selected</div>
+                    </div>
+                    <div className='third-sec'>
+                        <div className='specific-cmds'>Specific commands go here</div>
+                        <div className='specific-cmds'>Also changes depending on selection</div>
                     </div>
                 </div>
                 <div className="table-container">
