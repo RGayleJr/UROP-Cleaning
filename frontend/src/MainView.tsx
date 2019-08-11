@@ -9,13 +9,12 @@ import "./MainView.scss"
 export class MainView extends React.Component {
     @observable
     private _csvRows: string[];
+    private  _selection: any[] = [];
     constructor(props: any) {
         super(props);
     }
 
     @action
-    var selection: any[];
-
     onCleanClick = (e: React.MouseEvent) => {
         let commands = [ 
             "dcf.create_limiting_factor(df, 'PID', 'digits')",
@@ -33,8 +32,9 @@ export class MainView extends React.Component {
         })
     };
 
+    @action
     onRemoveClick = (e: React.MouseEvent) => {
-        this.selection[0] = 'Remove';
+        this._selection[0] = 'Remove';
         console.log('Remove');
     };
 
