@@ -10,6 +10,9 @@ def is_nan(x):
 def get_col_name(df, col):
     columns = set(df)
     if col not in columns:
+        if type(col) == int:
+            colname = df.columns[col]
+            return colname
         for i in columns:
             colname = i[0]
             if colname == col:
@@ -656,3 +659,7 @@ Clean other datasets
 Do a cleaning (describe function from pandas)
 Design UI Mock-up
 """
+
+"""
+1. Make code to do things with col index
+2. 
