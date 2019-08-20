@@ -4,6 +4,7 @@ import { DataTable } from "./datatable/DataTable";
 import { observable, runInAction, action } from "mobx";
 import { Gateway } from "./Gateway";
 import "./MainView.scss"
+import { DataTableViewModel } from "./datatable/DataTableViewModel";
 
 @observer
 export class MainView extends React.Component {
@@ -11,8 +12,14 @@ export class MainView extends React.Component {
     private _csvRows: string[];
     private  _selection: any[] = [];
     private _prev_click: string;
+<<<<<<< HEAD
+    private _dataTableViewModel:DataTableViewModel;
+=======
+>>>>>>> 3039da7abeef849a711e0d07bd32b5a7a8f54525
     constructor(props: any) {
         super(props);
+
+        this._dataTableViewModel = new DataTableViewModel();
     }
 
     @action
@@ -38,6 +45,10 @@ export class MainView extends React.Component {
         // if (this._prev_click != Headers || this._prev_click != cells || this._prev_click != indices) {
         //     this._selection = [];
         // };
+<<<<<<< HEAD
+        console.log(this._dataTableViewModel)
+=======
+>>>>>>> 3039da7abeef849a711e0d07bd32b5a7a8f54525
         this._selection.unshift('Remove');
         console.log('Remove');
         this._prev_click = 'Remove';
@@ -116,7 +127,7 @@ export class MainView extends React.Component {
                     </div>
                 </div>
                 <div className="table-container">
-                    <DataTable rawData={this._csvRows} />
+                    <DataTable viewModel={this._dataTableViewModel} rawData={this._csvRows} />
                 </div>
                 <button onClick={this.onCleanClick} className="btn-clean">Clean</button>
             </div>
