@@ -1,9 +1,11 @@
 import React = require("react");
 import { ValueConverter } from "./ValueConverter";
+import { DataTableViewModel } from "./DataTableViewModel";
 
 interface IProps {
     converters: ValueConverter[];
     columns: string[];
+    viewModel:DataTableViewModel
 }
 
 export class DataTableRow extends React.Component<IProps> {
