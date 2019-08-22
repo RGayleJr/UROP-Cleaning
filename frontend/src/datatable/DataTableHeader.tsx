@@ -10,6 +10,7 @@ interface IProps {
 }
 
 export class DataTableHeader extends React.Component<IProps> {
+    props: any;
 
     constructor(props: any) {
         super(props)

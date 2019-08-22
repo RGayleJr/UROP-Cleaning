@@ -9,6 +9,7 @@ interface IProps {
 }
 
 export class DataTableRow extends React.Component<IProps> {
+    props: any;
 
     constructor(props: any) {
         super(props)

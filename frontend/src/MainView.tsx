@@ -12,10 +12,7 @@ export class MainView extends React.Component {
     private _csvRows: string[];
     private  _selection: any[] = [];
     private _prev_click: string;
-<<<<<<< HEAD
     private _dataTableViewModel:DataTableViewModel;
-=======
->>>>>>> 3039da7abeef849a711e0d07bd32b5a7a8f54525
     constructor(props: any) {
         super(props);
 
@@ -45,10 +42,7 @@ export class MainView extends React.Component {
         // if (this._prev_click != Headers || this._prev_click != cells || this._prev_click != indices) {
         //     this._selection = [];
         // };
-<<<<<<< HEAD
         console.log(this._dataTableViewModel)
-=======
->>>>>>> 3039da7abeef849a711e0d07bd32b5a7a8f54525
         this._selection.unshift('Remove');
         console.log('Remove');
         this._prev_click = 'Remove';
