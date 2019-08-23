@@ -10,8 +10,8 @@ import { DataTableViewModel } from "./datatable/DataTableViewModel";
 export class MainView extends React.Component {
     @observable
     private _csvRows: string[];
-    private  _selection: any[] = [];
-    private _prev_click: string;
+    // private  _selection: any[] = [];
+    // private _prev_click: string;
     private _dataTableViewModel:DataTableViewModel;
     constructor(props: any) {
         super(props);
@@ -43,37 +43,43 @@ export class MainView extends React.Component {
         //     this._selection = [];
         // };
         console.log(this._dataTableViewModel)
-        this._selection.unshift('Remove');
+        // this._selection.unshift('Remove');
         console.log('Remove');
-        this._prev_click = 'Remove';
-        if (this._selection != ['Remove',]) {
-            let map_cmnds = [];
-            for (var object of this._selection) {
-                let temp = ['Remove',];
-                if (object == 'Remove') {
-                    continue;
-                };
-                temp.push(object);
-            };
-        };
+        this._dataTableViewModel.Prev_Click = 'Remove';
+        // if (this._dataTableViewModel.Selections.length > 0) {
+        //     this._dataTableViewModel.Selections.forEach(element => {
+        //         if (element in 
+        //     });
+        // }
+        // if (this._selection != ['Remove',]) {
+        //     let map_cmnds = [];
+        //     for (var object of this._selection) {
+        //         let temp = ['Remove',];
+        //         if (object == 'Remove') {
+        //             continue;
+        //         };
+        //         temp.push(object);
+        //     };
+        // };
     };
 
     @action
     onKeepClick = (e: React.MouseEvent) => {
-        this._selection.unshift('Keep');
+        // this._selection.unshift('Keep');
+        console.log(this._dataTableViewModel)
         console.log('Keep');
-        this._prev_click = 'Keep';
-        if (this._selection != ['Keep',]) {
-            let map_cmnds = [];
-            for (var object of this._selection) {
-                let temp = ['Remove',];
-                if (object == 'Remove') {
-                    continue;
-                };
-                temp.push(object);
-            };
-        };
-        // add something that adds a confirm button to be clicked after selecting all the things to keep
+        this._dataTableViewModel.Prev_Click = 'Keep';
+    //     if (this._selection != ['Keep',]) {
+    //         let map_cmnds = [];
+    //         for (var object of this._selection) {
+    //             let temp = ['Remove',];
+    //             if (object == 'Remove') {
+    //                 continue;
+    //             };
+    //             temp.push(object);
+    //         };
+    //     };
+    //     // add something that adds a confirm button to be clicked after selecting all the things to keep
     };
 
     @action
